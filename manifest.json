@@ -1,10 +1,14 @@
 {
-  "name": "Mi Plataforma",
-  "short_name": "Plataforma",
+  "id": "com.visionary.app",
+  "name": "Visionary App",
+  "short_name": "Visionary",
+  "description": "Aplicación para gestión y registro de datos sincronizados con Google Sheets mediante Apps Script.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
+  "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -15,6 +19,20 @@
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ]
 }
