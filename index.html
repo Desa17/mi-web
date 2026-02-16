@@ -16,6 +16,15 @@ h1 { text-align:center; }
 .slider-dots span { display:inline-block; width:10px; height:10px; background-color:#ddd; border-radius:50%; margin:0 5px; cursor:pointer; }
 .slider-dots span.active { background-color:#555; }
 button { padding:10px 15px; margin-top:10px; cursor:pointer; width:100%; }
+
+.estrellas {
+  display:flex; 
+  gap:2px; 
+  font-size:18px; 
+}
+.estrella { color:#ccc; transition: color 0.3s, transform 0.3s; }
+.estrella.llenada { color: gold; transform: scale(1.2); }
+
 @media (max-width:768px){ .producto { width:90%; } }
 
 /* Zoom modal */
@@ -56,9 +65,13 @@ function mostrarProductos(){
     const imagenes = [p[7],p[8],p[9],p[10],p[11]].filter(url=>url && url.trim()!="");
     const sliderId = `slider-${index}`;
     const dotsId = `dots-${index}`;
-    const estado = Math.round(p[6]/2);
-    let estrellas="";
-    for(let i=0;i<5;i++){ estrellas += i<estado ? "★" : "☆"; }
+
+    // Convertir estado (1-10) en 5 estrellas interactivas visuales
+    const estrellasCount = Math.round(p[6]/2);
+    let estrellasHTML = '';
+    for(let i=0;i<5;i++){
+      estrellasHTML += `<span class="estrella ${i<estrellasCount ? 'llenada' : ''}">★</span>`;
+    }
 
     return `
       <div class="producto">
@@ -69,7 +82,7 @@ function mostrarProductos(){
           ${imagenes.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}
         </div>
         <p><strong>Código:</strong> ${p[1]}</p>
-        <p><strong>Estado:</strong> ${estrellas}</p>
+        <div class="estrellas">${estrellasHTML}</div>
         <h3>${p[2]}</h3>
         <p>${p[3]}</p>
         <p><strong>Precio:</strong> S/${p[4]}</p>
