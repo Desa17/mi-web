@@ -1,18 +1,18 @@
-self.addEventListener('install', e => {
-  e.waitUntil(
+self.addEventListener('install', event => {
+  event.waitUntil(
     caches.open('app-cache').then(cache => {
       return cache.addAll([
         '/',
-        '/index.html',
-        '/style.css',
-        '/script.js'
+        '/index.html'
       ]);
     })
   );
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(resp => resp || fetch(e.request))
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
