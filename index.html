@@ -1,285 +1,195 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  <link rel="manifest" href="/manifest.json">
   <title>Tienda de Juguetes</title>
-
-  <!-- ================== CSS ================== -->
   <style>
-    /* === BODY Y ENCABEZADOS === */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 10px;
-    }
+    body { font-family: Arial, sans-serif; margin:0; padding:10px; }
+    h1 { text-align:center; }
+    .productos-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
+    .producto { width:300px; border:1px solid #ddd; border-radius:8px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); position:relative; }
+    .slider { position:relative; width:100%; height:300px; overflow:hidden; margin-bottom:10px; cursor:grab; }
+    .slider img { width:100%; height:300px; object-fit:cover; display:none; transition:transform 0.3s; }
+    .slider img.active { display:block; }
+    .slider-dots { text-align:center; margin-top:5px; }
+    .slider-dots span { display:inline-block; width:10px; height:10px; background-color:#ddd; border-radius:50%; margin:0 5px; cursor:pointer; }
+    .slider-dots span.active { background-color:#555; }
+    button { padding:10px 15px; margin-top:10px; cursor:pointer; width:100%; }
 
-    h1 {
-      text-align: center;
-    }
+    @media (max-width:768px){ .producto { width:90%; } }
 
-    /* === CONTENEDOR DE PRODUCTOS === */
-    .productos-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-    }
+    /* Estrellas */
+    .estrellas { font-size:20px; color:gold; }
 
-    /* === CARD DE CADA PRODUCTO === */
-    .producto {
-      width: 300px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    /* === SLIDER DE IMÁGENES === */
-    .slider {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      overflow: hidden;
-      margin-bottom: 10px;
-      cursor: grab;
-    }
-
-    .slider img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      display: none;
-      transition: transform 0.3s;
-    }
-
-    .slider img.active {
-      display: block;
-    }
-
-    /* === PUNTOS DEL SLIDER === */
-    .slider-dots {
-      text-align: center;
-      margin-top: 5px;
-    }
-
-    .slider-dots span {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background-color: #ddd;
-      border-radius: 50%;
-      margin: 0 5px;
-      cursor: pointer;
-    }
-
-    .slider-dots span.active {
-      background-color: #555;
-    }
-
-    /* === BOTÓN === */
-    button {
-      padding: 10px 15px;
-      margin-top: 10px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    @media (max-width:768px){
-      .producto { width: 90%; }
-    }
-
-    /* === MODAL ZOOM === */
+    /* Zoom modal */
     #zoomModal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
+      display:none; position:fixed; z-index:1000; left:0; top:0;
+      width:100%; height:100%; background-color:rgba(0,0,0,0.8);
+      justify-content:center; align-items:center;
     }
-
     #zoomModal img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 8px;
-      transform: scale(1);
+      max-width:90%; max-height:90%; border-radius:8px; transform: scale(1);
       transition: transform 0.3s;
       cursor: zoom-out;
     }
   </style>
 </head>
 <body>
+<h1>Mi Tienda</h1>
+<div id="productos" class="productos-container"></div>
 
-  <h1>Mi Tienda de Juguetes</h1>
-  <!-- Contenedor donde se mostrarán los productos -->
-  <div id="productos" class="productos-container"></div>
+<!-- Modal zoom -->
+<div id="zoomModal"><img id="zoomImg"></div>
 
-  <!-- Modal para hacer zoom en las imágenes -->
-  <div id="zoomModal"><img id="zoomImg"></div>
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
+let productos = [];
 
-  <!-- ================== JAVASCRIPT ================== -->
-  <script>
-    // URL de la API de Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
+async function cargarProductos(){
+  const res = await fetch(WEB_APP_URL);
+  productos = await res.json();
+  productos = productos.slice(1); // saltar encabezados
+  productos = productos.sort(()=>Math.random()-0.5);
+  mostrarProductos();
+}
 
-    // Array donde se almacenarán los productos
-    let listaProductos = [];
+function mostrarProductos(){
+  const cont = document.getElementById('productos');
+  cont.innerHTML = productos.map((p,index)=>{
+    const imagenes = [p[7],p[8],p[9],p[10],p[11]].filter(url=>url && url.trim()!="");
+    const sliderId = `slider-${index}`;
+    const dotsId = `dots-${index}`;
 
-    // ================== FUNCIONES PRINCIPALES ==================
-
-    // Función para cargar productos desde la API
-    async function cargarProductos() {
-      const respuesta = await fetch(API_URL);
-      listaProductos = await respuesta.json();
-
-      // Saltar encabezados y mezclar aleatoriamente
-      listaProductos = listaProductos.slice(1).sort(() => Math.random() - 0.5);
-
-      mostrarProductosEnPantalla();
+    // Estado desde Google Sheet
+    const valorOriginal = parseFloat(p[6]) || 0; // tu valor en la hoja (0-10)
+    const valor = valorOriginal / 2; // convertir a 5 estrellas
+    let estrellasHtml = '<span class="estrellas">';
+    for(let i=0;i<5;i++){
+      if(i < Math.floor(valor)) estrellasHtml += '★';
+      else if(i < valor) estrellasHtml += '⯨'; // media estrella
+      else estrellasHtml += '☆';
     }
+    estrellasHtml += '</span>';
 
-    // Función para mostrar los productos en el HTML
-    function mostrarProductosEnPantalla() {
-      const contenedor = document.getElementById('productos');
+    return `
+      <div class="producto">
+        <div class="slider" id="${sliderId}">
+          ${imagenes.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}" alt="${p[2]}">`).join('')}
+        </div>
+        <div class="slider-dots" id="${dotsId}">
+          ${imagenes.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}
+        </div>
+        <p><strong>Código:</strong> ${p[1]}</p>
+        <p><strong>Estado:</strong> ${estrellasHtml}</p>
+        <h3>${p[2]}</h3>
+        <p>${p[3]}</p>
+        <p><strong>Precio:</strong> S/${p[4]}</p>
+        <button onclick="comprar('${p[2]}')">Comprar</button>
+      </div>
+    `;
+  }).join('');
 
-      contenedor.innerHTML = listaProductos.map((producto, index) => {
-        const imagenes = [producto[7], producto[8], producto[9], producto[10], producto[11]]
-                          .filter(url => url && url.trim() !== "");
+  productos.forEach((_,i)=>iniciarSlider(i));
+}
 
-        const sliderId = `slider-${index}`;
-        const dotsId = `dots-${index}`;
-        const estrellas = generarEstrellas(producto[6]);
+function iniciarSlider(index){
+  const slider = document.getElementById(`slider-${index}`);
+  const dots = document.getElementById(`dots-${index}`).children;
+  if(!slider) return;
+  const imgs = slider.querySelectorAll("img");
+  if(imgs.length<=1) return;
 
-        return `
-          <div class="producto">
-            <div class="slider" id="${sliderId}">
-              ${imagenes.map((img, i) => `<img src="${img}" class="${i===0?'active':''}">`).join('')}
-            </div>
-            <div class="slider-dots" id="${dotsId}">
-              ${imagenes.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('')}
-            </div>
-            <p><strong>Código:</strong> ${producto[1]}</p>
-            <p><strong>Estado:</strong> ${estrellas}</p>
-            <h3>${producto[2]}</h3>
-            <p>${producto[3]}</p>
-            <p><strong>Precio:</strong> S/${producto[4]}</p>
-            <button onclick="reservarProducto('${producto[2]}')">Comprar</button>
-          </div>
-        `;
-      }).join('');
+  let current=0;
+  let intervalo=setInterval(nextSlide,3000);
 
-      listaProductos.forEach((_, i) => inicializarSlider(i));
-    }
+  function nextSlide(){
+    imgs[current].classList.remove("active");
+    dots[current].classList.remove("active");
+    current=(current+1)%imgs.length;
+    imgs[current].classList.add("active");
+    dots[current].classList.add("active");
+  }
 
-    // ================== FUNCIONES AUXILIARES ==================
+  // Zoom modal
+  imgs.forEach(img=>{
+    img.addEventListener('click',()=>{
+      clearInterval(intervalo);
+      const zoomModal = document.getElementById('zoomModal');
+      const zoomImg = document.getElementById('zoomImg');
+      zoomImg.src = img.src;
+      zoomModal.style.display='flex';
+    });
+  });
 
-    // Genera la visualización de estrellas según el estado
-    function generarEstrellas(valorEstado) {
-      const cantidadEstrellas = Math.round(valorEstado / 2);
-      return Array.from({length: 5}, (_, i) => i < cantidadEstrellas ? "★" : "☆").join("");
-    }
+  document.getElementById('zoomModal').addEventListener('click',()=>{
+    document.getElementById('zoomModal').style.display='none';
+    intervalo=setInterval(nextSlide,3000);
+  });
 
-    // Función para comprar/reservar un producto
-    async function reservarProducto(nombreProducto) {
-      const respuesta = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "reservar", producto: nombreProducto })
-      });
+  // Dots click
+  Array.from(dots).forEach((dot,i)=>{
+    dot.addEventListener('click',()=>{
+      imgs[current].classList.remove("active");
+      dots[current].classList.remove("active");
+      current=i;
+      imgs[current].classList.add("active");
+      dots[current].classList.add("active");
+      clearInterval(intervalo);
+      intervalo=setInterval(nextSlide,3000);
+    });
+  });
 
-      const data = await respuesta.json();
-      if (data.success) {
-        alert("Producto reservado. Se abrirá WhatsApp para concretar la compra.");
-        window.open(`https://wa.me/51999999999?text=Hola,%20quiero%20comprar%20el%20producto%20${nombreProducto}`);
-      } else {
-        alert(data.mensaje);
-      }
-    }
+  // Drag / swipe
+  let startX=0;
+  slider.addEventListener('mousedown', e=>{ startX=e.clientX; clearInterval(intervalo); });
+  slider.addEventListener('mouseup', e=>{
+    let diff = e.clientX - startX;
+    if(diff>50){ current = (current-1+imgs.length)%imgs.length; } 
+    else if(diff<-50){ current = (current+1)%imgs.length; }
+    imgs.forEach(img=>img.classList.remove("active"));
+    Array.from(dots).forEach(dot=>dot.classList.remove("active"));
+    imgs[current].classList.add("active");
+    dots[current].classList.add("active");
+    intervalo=setInterval(nextSlide,3000);
+  });
 
-    // ================== FUNCIONES SLIDER ==================
+  // Touch events para móviles
+  slider.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; clearInterval(intervalo); });
+  slider.addEventListener('touchend', e=>{
+    let diff = e.changedTouches[0].clientX - startX;
+    if(diff>50){ current = (current-1+imgs.length)%imgs.length; } 
+    else if(diff<-50){ current = (current+1)%imgs.length; }
+    imgs.forEach(img=>img.classList.remove("active"));
+    Array.from(dots).forEach(dot=>dot.classList.remove("active"));
+    imgs[current].classList.add("active");
+    dots[current].classList.add("active");
+    intervalo=setInterval(nextSlide,3000);
+  });
+}
 
-    // Inicializa el slider de imágenes para cada producto
-    function inicializarSlider(index) {
-      const slider = document.getElementById(`slider-${index}`);
-      const dots = document.getElementById(`dots-${index}`).children;
-      if (!slider) return;
+async function comprar(nombre){
+  const res = await fetch(WEB_APP_URL,{
+    method:"POST",
+    body: JSON.stringify({action:"reservar",producto:nombre})
+  });
+  const data = await res.json();
+  if(data.success){
+    alert("Producto reservado. Se abrirá WhatsApp para concretar la compra.");
+    window.open(`https://wa.me/51999999999?text=Hola,%20quiero%20comprar%20el%20producto%20${nombre}`);
+  } else {
+    alert(data.mensaje);
+  }
+}
 
-      const imgs = slider.querySelectorAll("img");
-      if (imgs.length <= 1) return;
+cargarProductos();
 
-      let current = 0;
-      let intervalo = setInterval(nextSlide, 3000);
-
-      function nextSlide() {
-        imgs[current].classList.remove("active");
-        dots[current].classList.remove("active");
-        current = (current + 1) % imgs.length;
-        imgs[current].classList.add("active");
-        dots[current].classList.add("active");
-      }
-
-      // Zoom al hacer clic en la imagen
-      imgs.forEach(img => {
-        img.addEventListener('click', () => {
-          clearInterval(intervalo);
-          document.getElementById('zoomImg').src = img.src;
-          document.getElementById('zoomModal').style.display = 'flex';
-        });
-      });
-
-      // Cerrar modal al hacer clic
-      document.getElementById('zoomModal').addEventListener('click', () => {
-        document.getElementById('zoomModal').style.display = 'none';
-        intervalo = setInterval(nextSlide, 3000);
-      });
-
-      // Dots click
-      Array.from(dots).forEach((dot, i) => {
-        dot.addEventListener('click', () => {
-          cambiarSlide(i);
-        });
-      });
-
-      // Drag/Swipe para escritorio y móviles
-      let startX = 0;
-      slider.addEventListener('mousedown', e => { startX = e.clientX; clearInterval(intervalo); });
-      slider.addEventListener('mouseup', e => { manejarSwipe(e.clientX - startX); });
-      slider.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(intervalo); });
-      slider.addEventListener('touchend', e => { manejarSwipe(e.changedTouches[0].clientX - startX); });
-
-      function manejarSwipe(diff) {
-        if (diff > 50) current = (current - 1 + imgs.length) % imgs.length;
-        else if (diff < -50) current = (current + 1) % imgs.length;
-        cambiarSlide(current);
-        intervalo = setInterval(nextSlide, 3000);
-      }
-
-      function cambiarSlide(nuevo) {
-        imgs.forEach(img => img.classList.remove("active"));
-        Array.from(dots).forEach(dot => dot.classList.remove("active"));
-        current = nuevo;
-        imgs[current].classList.add("active");
-        dots[current].classList.add("active");
-      }
-    }
-
-    // ================== INICIALIZACIÓN ==================
-    cargarProductos();
-
-    // Registro del Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('Service Worker registrado'));
-    }
-
-  </script>
-
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker registrado'));
+}
+</script>
 </body>
 </html>
