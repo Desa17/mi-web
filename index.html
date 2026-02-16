@@ -24,8 +24,7 @@ button { padding:10px 15px; margin-top:10px; cursor:pointer; width:100%; }
 <div id="productos" class="productos-container"></div>
 
 <script>
-// ------------------ URL de tu Web App ------------------
-// Reemplaza con la URL de tu Apps Script publicada como Web App
+// ------------------ Tu Web App URL ------------------
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
 
 let productos = [];
@@ -33,6 +32,7 @@ let productos = [];
 async function cargarProductos(){
   const res = await fetch(WEB_APP_URL);
   productos = await res.json();
+  productos = productos.slice(1); // saltar encabezado
   productos = productos.sort(()=>Math.random()-0.5); // barajar productos
   mostrarProductos();
 }
@@ -44,6 +44,14 @@ function mostrarProductos(){
     const sliderId = `slider-${index}`;
     const dotsId = `dots-${index}`;
 
+    // Convertir estado (1-10) en 5 estrellas
+    const estado = Math.round(p[6] / 2); // de 10 a 5 estrellas
+    let estrellas = "";
+    for(let i=0;i<5;i++){
+      if(i<estado) estrellas += "★";
+      else estrellas += "☆";
+    }
+
     return `
       <div class="producto">
         <div class="slider" id="${sliderId}">
@@ -53,10 +61,10 @@ function mostrarProductos(){
           ${imagenes.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}
         </div>
         <p><strong>Código:</strong> ${p[1]}</p>
-        <p><strong>Estado:</strong> ${p[6]}/10</p>
+        <p><strong>Estado:</strong> ${estrellas}</p>
         <h3>${p[2]}</h3>
         <p>${p[3]}</p>
-        <p><strong>Precio:</strong> $${p[4]}</p>
+        <p><strong>Precio:</strong> S/${p[4]}</p>
         <button onclick="comprar('${p[2]}')">Comprar</button>
       </div>
     `;
@@ -118,4 +126,3 @@ cargarProductos();
 </script>
 </body>
 </html>
-
