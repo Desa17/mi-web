@@ -5,83 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tienda de Juguetes</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 10px;
-}
-
-h1 {
-  text-align: center;
-}
-
-.productos-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
-}
-
-.producto {
-  width: 300px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.slider {
-  position: relative;
-  width: 100%;
-  height: 300px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.slider img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  display: none;
-  cursor: pointer;
-  transition: opacity 0.5s;
-}
-
-.slider img.active {
-  display: block;
-}
-
-.slider-dots {
-  text-align: center;
-  margin-top: 5px;
-}
-
-.slider-dots span {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background-color: #ddd;
-  border-radius: 50%;
-  margin: 0 5px;
-  cursor: pointer;
-}
-
-.slider-dots span.active {
-  background-color: #555;
-}
-
-button {
-  padding: 10px 15px;
-  margin-top: 10px;
-  cursor: pointer;
-  width: 100%;
-}
-
-@media (max-width: 768px){
-  .producto {
-    width: 90%;
-  }
-}
+body { font-family: Arial, sans-serif; margin:0; padding:10px; }
+h1 { text-align:center; }
+.productos-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
+.producto { width:300px; border:1px solid #ddd; border-radius:8px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.slider { position:relative; width:100%; height:300px; overflow:hidden; margin-bottom:10px; }
+.slider img { width:100%; height:300px; object-fit:cover; display:none; cursor:pointer; transition:opacity 0.5s; }
+.slider img.active { display:block; }
+.slider-dots { text-align:center; margin-top:5px; }
+.slider-dots span { display:inline-block; width:10px; height:10px; background-color:#ddd; border-radius:50%; margin:0 5px; cursor:pointer; }
+.slider-dots span.active { background-color:#555; }
+button { padding:10px 15px; margin-top:10px; cursor:pointer; width:100%; }
+@media (max-width:768px){ .producto { width:90%; } }
 </style>
 </head>
 <body>
@@ -89,5 +24,97 @@ button {
 <div id="productos" class="productos-container"></div>
 
 <script>
-// -------------------- Configura tu URL de Apps Script --------------------
-// Reemplaza con
+// ------------------ URL de tu Web App ------------------
+// Reemplaza con la URL de tu Apps Script publicada como Web App
+const WEB_APP_URL = "TU_URL_DE_WEB_APP";
+
+let productos = [];
+
+async function cargarProductos(){
+  const res = await fetch(WEB_APP_URL);
+  productos = await res.json();
+  productos = productos.sort(()=>Math.random()-0.5); // barajar productos
+  mostrarProductos();
+}
+
+function mostrarProductos(){
+  const cont = document.getElementById('productos');
+  cont.innerHTML = productos.map((p,index)=>{
+    const imagenes = [p[7],p[8],p[9],p[10],p[11]].filter(url=>url && url.trim()!="");
+    const sliderId = `slider-${index}`;
+    const dotsId = `dots-${index}`;
+
+    return `
+      <div class="producto">
+        <div class="slider" id="${sliderId}">
+          ${imagenes.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}">`).join('')}
+        </div>
+        <div class="slider-dots" id="${dotsId}">
+          ${imagenes.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}
+        </div>
+        <p><strong>Código:</strong> ${p[1]}</p>
+        <p><strong>Estado:</strong> ${p[6]}/10</p>
+        <h3>${p[2]}</h3>
+        <p>${p[3]}</p>
+        <p><strong>Precio:</strong> $${p[4]}</p>
+        <button onclick="comprar('${p[2]}')">Comprar</button>
+      </div>
+    `;
+  }).join('');
+  productos.forEach((_,i)=>iniciarSlider(i));
+}
+
+function iniciarSlider(index){
+  const slider = document.getElementById(`slider-${index}`);
+  const dots = document.getElementById(`dots-${index}`).children;
+  if(!slider) return;
+  const imgs = slider.querySelectorAll("img");
+  if(imgs.length<=1) return;
+
+  let current=0;
+  let intervalo=setInterval(nextSlide,3000);
+
+  function nextSlide(){
+    imgs[current].classList.remove("active");
+    dots[current].classList.remove("active");
+    current=(current+1)%imgs.length;
+    imgs[current].classList.add("active");
+    dots[current].classList.add("active");
+  }
+
+  slider.addEventListener('click',()=>{
+    if(intervalo){ clearInterval(intervalo); intervalo=null; }
+    else { intervalo=setInterval(nextSlide,3000); }
+  });
+
+  Array.from(dots).forEach((dot,i)=>{
+    dot.addEventListener('click',()=>{
+      imgs[current].classList.remove("active");
+      dots[current].classList.remove("active");
+      current=i;
+      imgs[current].classList.add("active");
+      dots[current].classList.add("active");
+      if(intervalo) clearInterval(intervalo);
+      intervalo=setInterval(nextSlide,3000);
+    });
+  });
+}
+
+async function comprar(nombre){
+  const res = await fetch(WEB_APP_URL,{
+    method:"POST",
+    body: JSON.stringify({action:"reservar",producto:nombre})
+  });
+  const data = await res.json();
+  if(data.success){
+    alert("Producto reservado. Se abrirá WhatsApp para concretar la compra.");
+    window.open(`https://wa.me/51999999999?text=Hola,%20quiero%20comprar%20el%20producto%20${nombre}`);
+  } else {
+    alert(data.mensaje);
+  }
+}
+
+cargarProductos();
+</script>
+</body>
+</html>
