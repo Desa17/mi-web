@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Tienda</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .producto {
+      background: white;
+      padding: 15px;
+      margin-bottom: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .precio {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      margin-top: 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .comprar {
+      background: green;
+      color: white;
+    }
+
+    .vendido {
+      background: gray;
+      color: white;
+    }
+
+    .slider {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .slides img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2 id="tituloSecreto">Mi Tienda</h2>
+<div id="contenedor"></div>
+
+<script>
+
+const BASE_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
+
+/* ================================= */
+/* ===== CARGAR PRODUCTOS ===== */
+/* ================================= */
+
+fetch(BASE_URL + "?accion=obtenerProductos")
+  .then(res => res.json())
+  .then(mostrarProductos)
+  .catch(err => console.error("Error:", err));
+
+function mostrarProductos(productos) {
+
+  const contenedor = document.getElementById("contenedor");
+  contenedor.innerHTML = "";
+
+  productos.forEach(p => {
+
+    const producto = document.createElement("div");
+    producto.className = "producto";
+
+    const estadoBoton = p[9] === "disponible"
+      ? `<a class="btn comprar"
+           href="https://wa.me/51960915086?text=Hola quiero comprar el producto ${p[1]}"
+           target="_blank">COMPRAR</a>`
+      : `<div class="btn vendido">VENDIDO</div>`;
+
+    producto.innerHTML = `
+      <div class="slider" data-index="0">
+        <div class="slides">
+          ${p[6] ? `<img src="${p[6]}">` : ""}
+          ${p[7] ? `<img src="${p[7]}">` : ""}
+          ${p[8] ? `<img src="${p[8]}">` : ""}
+        </div>
+      </div>
+
+      <p><strong>Código:</strong> ${p[1]}</p>
+      <p><strong>Condición:</strong> ${p[5]}/10</p>
+      <h3>${p[2]}</h3>
+      <p>${p[3]}</p>
+      <div class="precio">S/ ${p[4]}</div>
+      ${estadoBoton}
+    `;
+
+    contenedor.appendChild(producto);
+  });
+}
+
+
+/* ================================= */
+/* ===== SLIDER AUTOMÁTICO ===== */
+/* ================================= */
+
+setInterval(() => {
+
+  document.querySelectorAll('.slider').forEach(slider => {
+
+    const slides = slider.querySelector('.slides');
+    if (!slides) return;
+
+    const total = slides.children.length;
+    if (total <= 1) return;
+
+    let index = parseInt(slider.getAttribute('data-index')) || 0;
+    index = (index + 1) % total;
+
+    slides.style.transform = `translateX(-${index * 100}%)`;
+    slider.setAttribute('data-index', index);
+
+  });
+
+}, 3000);
+
+
+/* ================================= */
+/* ===== ACCESO SECRETO ADMIN ===== */
+/* ================================= */
+
+let contadorClicks = 0;
+let tiempoInicio = 0;
+
+const titulo = document.getElementById("tituloSecreto");
+
+titulo.addEventListener("click", function() {
+
+  const ahora = new Date().getTime();
+
+  if (ahora - tiempoInicio > 3000) {
+    contadorClicks = 0;
+  }
+
+  tiempoInicio = ahora;
+  contadorClicks++;
+
+  if (contadorClicks === 5) {
+    window.location.href = BASE_URL + "?pagina=admin";
+  }
+
+});
+
+</script>
+
+</body>
+</html>
