@@ -8,45 +8,32 @@
 body { font-family: Arial, sans-serif; margin:0; padding:10px; }
 h1 { text-align:center; }
 .productos-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
-.producto { width:300px; border:1px solid #ddd; border-radius:8px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); position:relative; }
-.slider { position:relative; width:100%; height:300px; overflow:hidden; margin-bottom:10px; cursor:grab; }
-.slider img { width:100%; height:300px; object-fit:cover; display:none; transition:transform 0.3s; }
+.producto { width:300px; border:1px solid #ddd; border-radius:8px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.slider { position:relative; width:100%; height:300px; overflow:hidden; margin-bottom:10px; }
+.slider img { width:100%; height:300px; object-fit:cover; display:none; cursor:pointer; transition:opacity 0.5s; }
 .slider img.active { display:block; }
 .slider-dots { text-align:center; margin-top:5px; }
 .slider-dots span { display:inline-block; width:10px; height:10px; background-color:#ddd; border-radius:50%; margin:0 5px; cursor:pointer; }
 .slider-dots span.active { background-color:#555; }
 button { padding:10px 15px; margin-top:10px; cursor:pointer; width:100%; }
 @media (max-width:768px){ .producto { width:90%; } }
-
-/* Zoom modal */
-#zoomModal {
-  display:none; position:fixed; z-index:1000; left:0; top:0;
-  width:100%; height:100%; background-color:rgba(0,0,0,0.8);
-  justify-content:center; align-items:center;
-}
-#zoomModal img {
-  max-width:90%; max-height:90%; border-radius:8px; transform: scale(1);
-  transition: transform 0.3s;
-  cursor: zoom-out;
-}
 </style>
 </head>
 <body>
 <h1>Tienda de Juguetes Usados</h1>
 <div id="productos" class="productos-container"></div>
 
-<!-- Modal zoom -->
-<div id="zoomModal"><img id="zoomImg"></div>
-
 <script>
+// ------------------ Tu Web App URL ------------------
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
+
 let productos = [];
 
 async function cargarProductos(){
   const res = await fetch(WEB_APP_URL);
   productos = await res.json();
-  productos = productos.slice(1); // saltar encabezados
-  productos = productos.sort(()=>Math.random()-0.5);
+  productos = productos.slice(1); // saltar encabezado
+  productos = productos.sort(()=>Math.random()-0.5); // barajar productos
   mostrarProductos();
 }
 
@@ -56,9 +43,14 @@ function mostrarProductos(){
     const imagenes = [p[7],p[8],p[9],p[10],p[11]].filter(url=>url && url.trim()!="");
     const sliderId = `slider-${index}`;
     const dotsId = `dots-${index}`;
-    const estado = Math.round(p[6]/2);
-    let estrellas="";
-    for(let i=0;i<5;i++){ estrellas += i<estado ? "★" : "☆"; }
+
+    // Convertir estado (1-10) en 5 estrellas
+    const estado = Math.round(p[6] / 2); // de 10 a 5 estrellas
+    let estrellas = "";
+    for(let i=0;i<5;i++){
+      if(i<estado) estrellas += "★";
+      else estrellas += "☆";
+    }
 
     return `
       <div class="producto">
@@ -98,23 +90,11 @@ function iniciarSlider(index){
     dots[current].classList.add("active");
   }
 
-  // Zoom modal
-  imgs.forEach(img=>{
-    img.addEventListener('click',()=>{
-      clearInterval(intervalo);
-      const zoomModal = document.getElementById('zoomModal');
-      const zoomImg = document.getElementById('zoomImg');
-      zoomImg.src = img.src;
-      zoomModal.style.display='flex';
-    });
+  slider.addEventListener('click',()=>{
+    if(intervalo){ clearInterval(intervalo); intervalo=null; }
+    else { intervalo=setInterval(nextSlide,3000); }
   });
 
-  document.getElementById('zoomModal').addEventListener('click',()=>{
-    document.getElementById('zoomModal').style.display='none';
-    intervalo=setInterval(nextSlide,3000);
-  });
-
-  // Dots click
   Array.from(dots).forEach((dot,i)=>{
     dot.addEventListener('click',()=>{
       imgs[current].classList.remove("active");
@@ -122,36 +102,9 @@ function iniciarSlider(index){
       current=i;
       imgs[current].classList.add("active");
       dots[current].classList.add("active");
-      clearInterval(intervalo);
+      if(intervalo) clearInterval(intervalo);
       intervalo=setInterval(nextSlide,3000);
     });
-  });
-
-  // Drag / swipe
-  let startX=0;
-  slider.addEventListener('mousedown', e=>{ startX=e.clientX; clearInterval(intervalo); });
-  slider.addEventListener('mouseup', e=>{
-    let diff = e.clientX - startX;
-    if(diff>50){ current = (current-1+imgs.length)%imgs.length; } 
-    else if(diff<-50){ current = (current+1)%imgs.length; }
-    imgs.forEach(img=>img.classList.remove("active"));
-    Array.from(dots).forEach(dot=>dot.classList.remove("active"));
-    imgs[current].classList.add("active");
-    dots[current].classList.add("active");
-    intervalo=setInterval(nextSlide,3000);
-  });
-
-  // Touch events para móviles
-  slider.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; clearInterval(intervalo); });
-  slider.addEventListener('touchend', e=>{
-    let diff = e.changedTouches[0].clientX - startX;
-    if(diff>50){ current = (current-1+imgs.length)%imgs.length; } 
-    else if(diff<-50){ current = (current+1)%imgs.length; }
-    imgs.forEach(img=>img.classList.remove("active"));
-    Array.from(dots).forEach(dot=>dot.classList.remove("active"));
-    imgs[current].classList.add("active");
-    dots[current].classList.add("active");
-    intervalo=setInterval(nextSlide,3000);
   });
 }
 
