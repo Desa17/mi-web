@@ -1,8 +1,8 @@
 {
-  "id": "com.visionary.app",
-  "name": "Visionary App",
-  "short_name": "Visionary",
-  "description": "Aplicación para gestión y registro de datos sincronizados con Google Sheets mediante Apps Script.",
+  "id": "com.MiTienda.app",
+  "name": "Mi Tienda App",
+  "short_name": "Mi Tienda",
+  "description": "El Rincon De Juguetes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -36,3 +36,4 @@
     }
   ]
 }
+
