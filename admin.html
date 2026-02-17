@@ -1,235 +1,88 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel Admin</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Happy Store</title>
 <style>
-body{
-  font-family:Arial;
-  padding:20px;
-  background:#f5f5f5;
-  margin:0;
-}
-
-h2{
-  text-align:center;
-  margin-top:60px;
-}
-
-.top-bar{
-  position:fixed;
-  top:10px;
-  right:20px;
-  z-index:1000;
-}
-
-.cerrar-btn{
-  padding:5px 10px;
-  border:none;
-  border-radius:5px;
-  background:#c0392b;
-  color:white;
-  font-size:12px;
-  cursor:pointer;
-}
-
-.login-panel, .form-panel{
-  max-width:400px;
-  margin:0 auto;
-}
-
-.form-panel{
-  display:none;
-}
-
-input, textarea{
-  width:100%;
-  padding:8px;
-  border-radius:5px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-  margin-bottom:10px;
-  font-size:14px;
-}
-
-textarea{ resize:none; }
-
-button{
-  padding:6px 12px;
-  border:none;
-  border-radius:5px;
-  background:green;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.preview-img{
-  width:100px;
-  display:none;
-  margin-bottom:10px;
-}
+  body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; }
+  .login, .form-container { max-width:400px; margin: 50px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+  input, select { width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
+  button { width:100%; padding:12px; border:none; border-radius:6px; background:#FF002F; color:white; cursor:pointer; font-weight:bold; }
+  button:hover { background:#cc0026; }
 </style>
 </head>
-
 <body>
 
-<div class="top-bar" id="topBar" style="display:none;">
-  <button class="cerrar-btn" onclick="cerrarSesion()">Cerrar sesión</button>
+<div class="login" id="loginBox">
+  <h2>Admin Login</h2>
+  <input type="text" id="user" placeholder="Usuario">
+  <input type="password" id="pass" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
 </div>
 
-<h2>Panel de Administración</h2>
-
-<!-- LOGIN -->
-<div class="login-panel" id="loginPanel">
-  <input type="text" id="usuario" placeholder="Usuario">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button onclick="validarLogin()">Ingresar</button>
-  <div id="loginMensaje"></div>
-</div>
-
-<!-- FORMULARIO -->
-<div class="form-panel" id="formPanel">
-
-<h3>Agregar Producto</h3>
-
-<input id="codigo" placeholder="Código">
-<input id="nombre" placeholder="Nombre">
-<textarea id="descripcion" placeholder="Descripción"></textarea>
-<input id="precio" placeholder="Precio">
-<input id="condicion" placeholder="Condición (1-10)">
-
-<input id="imagen1" placeholder="URL Imagen 1" oninput="previewImagen('imagen1','preview1')">
-<img id="preview1" class="preview-img">
-
-<input id="imagen2" placeholder="URL Imagen 2" oninput="previewImagen('imagen2','preview2')">
-<img id="preview2" class="preview-img">
-
-<input id="imagen3" placeholder="URL Imagen 3" oninput="previewImagen('imagen3','preview3')">
-<img id="preview3" class="preview-img">
-
-<button onclick="agregarProducto()">Agregar</button>
-<div id="mensaje"></div>
-
+<div class="form-container" id="adminForm" style="display:none;">
+  <h2>Agregar Producto</h2>
+  <input type="text" id="codigo" placeholder="Código del producto">
+  <input type="text" id="nombre" placeholder="Nombre">
+  <textarea id="descripcion" placeholder="Descripción"></textarea>
+  <input type="number" id="precio" placeholder="Precio">
+  <input type="number" id="valoracion" placeholder="Valoración (0-10)" min="0" max="10">
+  <select id="estado">
+    <option value="Disponible">Disponible</option>
+    <option value="Reservado">Reservado</option>
+    <option value="Vendido">Vendido</option>
+  </select>
+  <input type="url" id="img1" placeholder="URL imagen 1">
+  <input type="url" id="img2" placeholder="URL imagen 2">
+  <input type="url" id="img3" placeholder="URL imagen 3">
+  <input type="url" id="img4" placeholder="URL imagen 4">
+  <input type="url" id="img5" placeholder="URL imagen 5">
+  <button onclick="agregarProducto()">Agregar Producto</button>
 </div>
 
 <script>
-
-const BASE_URL = "https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec";
-
-/* RECORDAR SESIÓN */
-window.onload = function(){
-  if(localStorage.getItem("adminLogueado") === "true"){
-    mostrarPanel();
-  }
-}
-
-/* MOSTRAR PANEL */
-function mostrarPanel(){
-  document.getElementById("loginPanel").style.display="none";
-  document.getElementById("formPanel").style.display="block";
-  document.getElementById("topBar").style.display="block";
-}
-
-/* LOGIN */
-function validarLogin(){
-
-  const user=document.getElementById("usuario").value;
-  const pass=document.getElementById("password").value;
-  const msg=document.getElementById("loginMensaje");
-
-  msg.innerHTML="Verificando...";
-
-  fetch(BASE_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      accion:"validarLogin",
-      user:user,
-      pass:pass
-    })
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.success){
-      localStorage.setItem("adminLogueado","true");
-      mostrarPanel();
-      msg.innerHTML="";
-    }else{
-      msg.innerHTML="<span style='color:red'>Credenciales incorrectas</span>";
+  // Login simple
+  function login() {
+    const user = document.getElementById('user').value;
+    const pass = document.getElementById('pass').value;
+    if(user === 'admin' && pass === '1234'){ // puedes cambiar usuario y contraseña
+      document.getElementById('loginBox').style.display='none';
+      document.getElementById('adminForm').style.display='block';
+    } else {
+      alert('Usuario o contraseña incorrectos');
     }
-  })
-  .catch(()=>{
-    msg.innerHTML="<span style='color:red'>Error conexión</span>";
-  });
-}
-
-/* CERRAR SESIÓN */
-function cerrarSesion(){
-  localStorage.removeItem("adminLogueado");
-  window.location.href=BASE_URL;
-}
-
-/* PREVISUALIZAR IMÁGENES */
-function previewImagen(inputId,imgId){
-  const url=document.getElementById(inputId).value.trim();
-  const img=document.getElementById(imgId);
-
-  if(url){
-    img.src=url;
-    img.style.display="block";
-  }else{
-    img.style.display="none";
   }
-}
 
-/* AGREGAR PRODUCTO */
-function agregarProducto(){
+  // Función para enviar el producto a Google Apps Script
+  function agregarProducto() {
+    const producto = {
+      codigo: document.getElementById('codigo').value,
+      nombre: document.getElementById('nombre').value,
+      descripcion: document.getElementById('descripcion').value,
+      precio: document.getElementById('precio').value,
+      valoracion: document.getElementById('valoracion').value,
+      estado: document.getElementById('estado').value,
+      img1: document.getElementById('img1').value,
+      img2: document.getElementById('img2').value,
+      img3: document.getElementById('img3').value,
+      img4: document.getElementById('img4').value,
+      img5: document.getElementById('img5').value
+    };
 
-  const msg=document.getElementById("mensaje");
-  msg.innerHTML="Agregando...";
-
-  const formulario={
-    codigo:codigo.value.trim(),
-    nombre:nombre.value.trim(),
-    descripcion:descripcion.value.trim(),
-    precio:precio.value.trim(),
-    condicion:condicion.value.trim(),
-    imagen1:imagen1.value.trim(),
-    imagen2:imagen2.value.trim(),
-    imagen3:imagen3.value.trim()
-  };
-
-  fetch(BASE_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      accion:"agregarProducto",
-      formulario:formulario
+    fetch('TU_WEB_APP_URL', {
+      method:'POST',
+      body: JSON.stringify({action:'agregar', producto: producto})
     })
-  })
-  .then(res=>res.json())
-  .then(res=>{
-    if(res.status==="ok"){
-      msg.innerHTML="<span style='color:green'>Producto agregado</span>";
-      document.querySelectorAll("#formPanel input, #formPanel textarea")
-        .forEach(el=>el.value="");
-      document.querySelectorAll(".preview-img")
-        .forEach(el=>el.style.display="none");
-    }else{
-      msg.innerHTML="<span style='color:red'>Error</span>";
-    }
-  })
-  .catch(()=>{
-    msg.innerHTML="<span style='color:red'>Error conexión</span>";
-  });
-}
-
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.success){
+        alert('Producto agregado correctamente');
+        document.getElementById('adminForm').reset();
+      } else alert(data.mensaje);
+    });
+  }
 </script>
 
 </body>
 </html>
-
-
