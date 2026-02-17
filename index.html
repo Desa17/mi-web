@@ -20,38 +20,39 @@
       color: #333;
     }
 
- /* Fuente moderna y centrada */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+    /* ================== AQUI EMPIEZA EL TITULO ================== */
+    
+/* Fuente moderna, deportiva y centrada */
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 h1 {
-  font-family: 'Bebas Neue', sans-serif; /* fuente moderna y llamativa */
+  font-family: 'Righteous', cursive; /* estilo deportivo/casual */
   text-align: center;
-  font-size: 3rem; /* más grande */
+  font-size: 3rem; /* tamaño grande para destacar */
   color: #FF002F;
-  text-transform: uppercase;
-  letter-spacing: 2px;
   margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   position: relative;
   display: block; /* garantiza centrado */
 }
 
-/* Línea decorativa debajo del título */
+/* Línea decorativa debajo */
 h1::after {
   content: '';
   display: block;
-  width: 120px; /* ancho de la línea */
+  width: 120px;
   height: 4px;
   background: linear-gradient(90deg, #FF002F, #cc0026);
-  margin: 10px auto 0; /* centrado horizontal */
+  margin: 10px auto 0;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-/* Efecto hover */
+/* Efecto hover de la línea */
 h1:hover::after {
   width: 160px;
 }
-
 
     /* ================== PRODUCTOS ================== */
     .productos-container {
@@ -308,5 +309,6 @@ h1:hover::after {
 
 </body>
 </html>
+
 
 
