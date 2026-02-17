@@ -232,7 +232,7 @@
             <h3>${producto[2]}</h3>
             <p>${producto[3]}</p>
             <p><strong>Precio:</strong> S/${producto[4]}</p>
-            <button onclick="reservarProducto('${producto[2]}')">Comprar</button>
+            <button onclick="reservarProducto('${producto[2]}','${producto[1]}')">Comprar</button>
           </div>
         `;
       }).join('');
@@ -240,17 +240,30 @@
       listaProductos.forEach((_,i)=>inicializarSlider(i));
     }
 
-    async function reservarProducto(nombreProducto) {
-      const respuesta = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action:"reservar", producto:nombreProducto })
-      });
-      const data = await respuesta.json();
-      if(data.success){
-        alert("Producto reservado. Se abrirá WhatsApp para concretar la compra.");
-        window.open(`https://wa.me/51999999999?text=Hola,%20quiero%20comprar%20el%20producto%20${nombreProducto}`);
-      } else alert(data.mensaje);
-    }
+  
+    async function reservarProducto(nombreProducto, codigoProducto) {
+  // Llamada opcional a tu API para registrar la reserva
+  const respuesta = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "reservar", producto: nombreProducto })
+  });
+
+  const data = await respuesta.json();
+
+  if(data.success){
+    // Mensaje que se enviará a WhatsApp
+    let mensaje = `Hola! Quiero comprar el producto: ${nombreProducto} (Código: ${codigoProducto})`;
+
+    // Codificar mensaje para URL
+    mensaje = encodeURIComponent(mensaje);
+
+    // Abrir WhatsApp en nueva pestaña
+    window.open(`https://wa.me/51999999999?text=${mensaje}`, '_blank');
+  } else {
+    alert(data.mensaje);
+  }
+}
+
 
     function inicializarSlider(index) {
       const slider = document.getElementById(`slider-${index}`);
@@ -316,6 +329,7 @@
 
 </body>
 </html>
+
 
 
 
