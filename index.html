@@ -20,12 +20,37 @@
       color: #333;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 700;
-      color: #FF002F; /* color principal */
-    }
+  h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 900;
+  font-size: 2.8rem; /* más grande */
+  color: #FF002F; /* color principal */
+  text-transform: uppercase; /* todas las letras en mayúscula */
+  letter-spacing: 2px; /* separación entre letras */
+  position: relative;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: transform 0.3s ease;
+}
+
+/* Sombra sutil */
+h1::after {
+  content: '';
+  display: block;
+  width: 60%;
+  height: 4px;
+  background: linear-gradient(90deg, #FF002F, #cc0026);
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+/* Animación al pasar el mouse */
+h1:hover {
+  transform: scale(1.05);
+}
+
 
     /* ================== PRODUCTOS ================== */
     .productos-container {
@@ -282,3 +307,4 @@
 
 </body>
 </html>
+
