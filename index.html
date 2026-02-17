@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#FF002F">
   <link rel="manifest" href="/manifest.json">
   <title>Tienda de Juguetes</title>
 
@@ -24,7 +24,7 @@
       text-align: center;
       margin-bottom: 30px;
       font-weight: 700;
-      color: #444;
+      color: #FF002F; /* color principal */
     }
 
     /* ================== PRODUCTOS ================== */
@@ -36,41 +36,39 @@
     }
 
     .producto {
-  width: 300px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
+      width: 300px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 6px 15px rgba(255,0,47,0.15); /* sombra sutil en color principal */
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
 
     .producto:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 20px rgba(255,0,47,0.25);
     }
 
     /* ================== SLIDER ================== */
-   .slider {
-  width: 100%;
-  aspect-ratio: 1/1; /* Esto hace que el slider sea cuadrado */
-  overflow: hidden;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  cursor: grab;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
-}
+    .slider {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: grab;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    }
 
-.slider img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Mantiene la proporción y recorta si es necesario */
-  display: none;
-  border-radius: 12px;
-}
-
+    .slider img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      transition: transform 0.3s;
+      border-radius: 12px;
+    }
 
     .slider img.active {
       display: block;
@@ -93,13 +91,13 @@
     }
 
     .slider-dots span.active {
-      background-color: #ff8c00;
+      background-color: #FF002F; /* color principal */
     }
 
     /* ================== ESTRELLAS ================== */
     .estrellas {
       font-size: 18px;
-      color: #ffb400; /* dorado */
+      color: #FF002F; /* dorado reemplazado por rojo principal */
       margin-bottom: 8px;
     }
 
@@ -109,17 +107,17 @@
       width: 100%;
       border: none;
       border-radius: 8px;
-      background: linear-gradient(135deg, #ff7f50, #ff6347);
+      background: linear-gradient(135deg, #FF002F, #cc0026);
       color: #fff;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(255,0,47,0.2);
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 12px rgba(255,0,47,0.3);
     }
 
     @media (max-width:768px) {
@@ -173,7 +171,7 @@
       let html = '';
       for(let i=0;i<5;i++){
         if(i < Math.floor(valor)) html += '★';
-        else if(i < valor) html += '⯨'; // media estrella
+        else if(i < valor) html += '⯨';
         else html += '☆';
       }
       return `<span class="estrellas">${html}</span>`;
@@ -284,4 +282,3 @@
 
 </body>
 </html>
-
