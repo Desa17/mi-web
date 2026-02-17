@@ -20,35 +20,36 @@
       color: #333;
     }
 
-  h1 {
+ /* Fuente moderna y centrada */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif; /* fuente moderna y llamativa */
   text-align: center;
-  margin-bottom: 30px;
-  font-weight: 900;
-  font-size: 2.8rem; /* más grande */
-  color: #FF002F; /* color principal */
-  text-transform: uppercase; /* todas las letras en mayúscula */
-  letter-spacing: 2px; /* separación entre letras */
+  font-size: 3rem; /* más grande */
+  color: #FF002F;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 40px;
   position: relative;
-  display: inline-block;
-  margin-left: auto;
-  margin-right: auto;
-  transition: transform 0.3s ease;
+  display: block; /* garantiza centrado */
 }
 
-/* Sombra sutil */
+/* Línea decorativa debajo del título */
 h1::after {
   content: '';
   display: block;
-  width: 60%;
+  width: 120px; /* ancho de la línea */
   height: 4px;
   background: linear-gradient(90deg, #FF002F, #cc0026);
-  margin: 8px auto 0;
+  margin: 10px auto 0; /* centrado horizontal */
   border-radius: 2px;
+  transition: width 0.3s ease;
 }
 
-/* Animación al pasar el mouse */
-h1:hover {
-  transform: scale(1.05);
+/* Efecto hover */
+h1:hover::after {
+  width: 160px;
 }
 
 
@@ -307,4 +308,5 @@ h1:hover {
 
 </body>
 </html>
+
 
