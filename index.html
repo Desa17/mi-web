@@ -21,37 +21,40 @@
     }
 
     /* ================== AQUI EMPIEZA EL TITULO ================== */
-    
-/* Fuente divertida, amigable y centrada */
+
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
-h1 {
-  font-family: 'Fredoka One', cursive;
+#titulo-happy {
+  font-family: 'Fredoka One', cursive; /* divertida y clara */
+  font-size: 2.2rem; /* tamaño mediano */
   text-align: center;
-  font-size: 3rem;       /* grande y llamativo */
-  color: #FF002F;        /* color principal */
-  margin-bottom: 40px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  position: relative;
-  display: block;
+  margin-bottom: 30px;
 }
 
-/* Línea decorativa debajo */
-h1::after {
-  content: '';
-  display: block;
-  width: 120px;
-  height: 5px;
-  background: linear-gradient(90deg, #FF002F, #cc0026);
-  margin: 10px auto 0;
-  border-radius: 3px;
-  transition: width 0.3s ease;
+/* Cada letra es un span para aplicar estilo individual */
+#titulo-happy span {
+  display: inline-block;
+  font-weight: bold;
+  transition: transform 0.3s, color 0.3s;
 }
 
-/* Efecto hover */
-h1:hover::after {
-  width: 160px;
+/* Letras con colores y ligeras rotaciones */
+#titulo-happy span:nth-child(1) { color: #FF002F; transform: rotate(-5deg); }
+#titulo-happy span:nth-child(2) { color: #FF7F50; transform: rotate(3deg); }
+#titulo-happy span:nth-child(3) { color: #FFA500; transform: rotate(-2deg); }
+#titulo-happy span:nth-child(4) { color: #00BFFF; transform: rotate(4deg); }
+#titulo-happy span:nth-child(5) { color: #32CD32; transform: rotate(-3deg); }
+#titulo-happy span:nth-child(6) { color: #FF69B4; transform: rotate(2deg); } /* espacio para separar palabras */
+#titulo-happy span:nth-child(7) { color: #FF002F; transform: rotate(-4deg); }
+#titulo-happy span:nth-child(8) { color: #FF8C00; transform: rotate(3deg); }
+#titulo-happy span:nth-child(9) { color: #1E90FF; transform: rotate(-2deg); }
+#titulo-happy span:nth-child(10){ color: #32CD32; transform: rotate(2deg); }
+#titulo-happy span:nth-child(11){ color: #FF1493; transform: rotate(-3deg); }
+
+/* Efecto hover para divertido movimiento */
+#titulo-happy span:hover {
+  transform: scale(1.3) rotate(0deg);
+  cursor: default;
 }
 
     /* ================== PRODUCTOS ================== */
@@ -176,7 +179,11 @@ h1:hover::after {
 </head>
 <body>
 
-  <h1>Happy Store</h1>
+  <h1 id="titulo-happy">
+  <span>H</span><span>a</span><span>p</span><span>p</span><span>y</span>
+  <span> </span>
+  <span>S</span><span>t</span><span>o</span><span>r</span><span>e</span>
+</h1>
 
   <div id="productos" class="productos-container"></div>
 
@@ -309,6 +316,7 @@ h1:hover::after {
 
 </body>
 </html>
+
 
 
 
